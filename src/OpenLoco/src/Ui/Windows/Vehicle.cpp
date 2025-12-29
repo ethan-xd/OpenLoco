@@ -2110,8 +2110,11 @@ namespace OpenLoco::Ui::Windows::Vehicle
                         args.source = DragVehiclePart::getDragCarComponent()->id;
                         args.dest = car->id;
 
-                        GameCommands::setErrorTitle(StringIds::cant_move_vehicle);
-                        GameCommands::doCommand(args, GameCommands::Flags::apply);
+                        if (Common::confirmComponentChange(args.source, StringIds::confirm_vehicle_component_move_cargo_warning_title, StringIds::confirm_vehicle_component_move_cargo_warning_message, StringIds::confirm_vehicle_component_move_cargo_warning_confirm))
+                        {
+                            GameCommands::setErrorTitle(StringIds::cant_move_vehicle);
+                            GameCommands::doCommand(args, GameCommands::Flags::apply);
+                        }
                     }
                     break;
                 }

@@ -2110,6 +2110,9 @@ namespace OpenLoco::StringIds
     constexpr StringId cheat_vehicle_cargo = 2396;
     constexpr StringId cheat_keep_cargo_modify_pickup = 2397;
     constexpr StringId tooltip_keep_cargo_modify_pickup = 2398;
+    constexpr StringId confirm_vehicle_component_move_cargo_warning_title = 2399;
+    constexpr StringId confirm_vehicle_component_move_cargo_warning_message = 2400;
+    constexpr StringId confirm_vehicle_component_move_cargo_warning_confirm = 2401;
 
     constexpr StringId temporary_object_load_str_0 = 8192;
     constexpr StringId temporary_object_load_str_1 = 8193;
