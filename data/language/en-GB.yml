@@ -2454,3 +2454,4 @@ strings:
   2399: "Confirm move component"
   2400: "Moving this vehicle component will remove all cargo aboard the entire vehicle. Continue?"
   2401: "Move component"
+  2402: "Moving this vehicle component will remove all cargo aboard both vehicles. Continue?"

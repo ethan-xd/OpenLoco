@@ -136,39 +136,58 @@ namespace OpenLoco::Ui::Windows::Vehicle
             return veh;
         }
 
-        static bool confirmComponentChange(const EntityId id, const OpenLoco::StringId windowTitle, const OpenLoco::StringId windowMessage, const OpenLoco::StringId windowConfirm)
+        static bool needsComponentChangeConfirm(EntityId id, const bool checkKeepCargoCheat)
         {
             auto* vehBase = EntityManager::get<Vehicles::VehicleBase>(id);
             if (vehBase == nullptr)
             {
-                // Should still run GameCommand so code path is identical to vanilla
-                return true;
+                return false;
             }
 
             auto* head = EntityManager::get<Vehicles::VehicleHead>(vehBase->getHead());
             if (head == nullptr)
             {
-                return true;
+                return false;
             }
 
             if (!head->hasAnyCargo())
             {
-                return true;
+                return false;
             }
 
-            if (Config::get().keepCargoModifyPickup)
+            if (checkKeepCargoCheat && Config::get().keepCargoModifyPickup)
             {
-                return true;
+                return false;
             }
 
             if (head->getCarCount() > 0 && CompanyManager::getControllingId() == head->owner)
             {
-
-                auto format = FormatArguments{};
-                return Windows::PromptOkCancel::open(windowTitle, windowMessage, format, windowConfirm);
+                return true;
             }
 
             return false;
+        }
+
+        static bool confirmComponentChange(const EntityId id, const OpenLoco::StringId windowTitle, const OpenLoco::StringId windowMessage, const OpenLoco::StringId windowConfirm, const bool checkKeepCargoCheat = true)
+        {
+            if (!needsComponentChangeConfirm(id, checkKeepCargoCheat))
+            {
+                return true;
+            }
+
+            auto format = FormatArguments{};
+            return Windows::PromptOkCancel::open(windowTitle, windowMessage, format, windowConfirm);
+        }
+
+        static bool confirmComponentChange(const EntityId srcId, const EntityId destId, const OpenLoco::StringId windowTitle, const OpenLoco::StringId windowMessage, const OpenLoco::StringId windowConfirm, const bool checkKeepCargoCheat = true)
+        {
+            if (!needsComponentChangeConfirm(srcId, checkKeepCargoCheat) && !needsComponentChangeConfirm(destId, checkKeepCargoCheat))
+            {
+                return true;
+            }
+
+            auto format = FormatArguments{};
+            return Windows::PromptOkCancel::open(windowTitle, windowMessage, format, windowConfirm);
         }
 
         static void onClose(Window& self);
@@ -2110,7 +2129,12 @@ namespace OpenLoco::Ui::Windows::Vehicle
                         args.source = DragVehiclePart::getDragCarComponent()->id;
                         args.dest = car->id;
 
-                        if (Common::confirmComponentChange(args.source, StringIds::confirm_vehicle_component_move_cargo_warning_title, StringIds::confirm_vehicle_component_move_cargo_warning_message, StringIds::confirm_vehicle_component_move_cargo_warning_confirm))
+                        auto* srcVehicle = EntityManager::get<Vehicles::VehicleBase>(args.source);
+                        auto* destVehicle = EntityManager::get<Vehicles::VehicleBase>(args.dest);
+
+                        bool sameHead = srcVehicle == nullptr || destVehicle == nullptr || srcVehicle->head == destVehicle->head;
+
+                        if (Common::confirmComponentChange(args.source, args.dest, StringIds::confirm_vehicle_component_move_cargo_warning_title, sameHead ? StringIds::confirm_vehicle_component_move_cargo_warning_message : StringIds::confirm_vehicle_component_move_cargo_multiple_vehicles_warning_message, StringIds::confirm_vehicle_component_move_cargo_warning_confirm))
                         {
                             GameCommands::setErrorTitle(StringIds::cant_move_vehicle);
                             GameCommands::doCommand(args, GameCommands::Flags::apply);
@@ -2418,7 +2442,7 @@ namespace OpenLoco::Ui::Windows::Vehicle
                     args.head = static_cast<EntityId>(self.number);
                     args.cargoType = Dropdown::getItemArgument(dropdownIndex, 3);
 
-                    if (Common::confirmComponentChange(args.head, StringIds::confirm_vehicle_component_refit_cargo_warning_title, StringIds::confirm_vehicle_component_refit_cargo_warning_message, StringIds::confirm_vehicle_component_refit_cargo_warning_confirm))
+                    if (Common::confirmComponentChange(args.head, StringIds::confirm_vehicle_component_refit_cargo_warning_title, StringIds::confirm_vehicle_component_refit_cargo_warning_message, StringIds::confirm_vehicle_component_refit_cargo_warning_confirm, false))
                     {
                         GameCommands::setErrorTitle(StringIds::cant_refit_vehicle);
                         GameCommands::doCommand(args, GameCommands::Flags::apply);

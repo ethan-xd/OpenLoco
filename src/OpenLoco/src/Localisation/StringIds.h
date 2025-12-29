@@ -2113,6 +2113,7 @@ namespace OpenLoco::StringIds
     constexpr StringId confirm_vehicle_component_move_cargo_warning_title = 2399;
     constexpr StringId confirm_vehicle_component_move_cargo_warning_message = 2400;
     constexpr StringId confirm_vehicle_component_move_cargo_warning_confirm = 2401;
+    constexpr StringId confirm_vehicle_component_move_cargo_multiple_vehicles_warning_message = 2402;
 
     constexpr StringId temporary_object_load_str_0 = 8192;
     constexpr StringId temporary_object_load_str_1 = 8193;
